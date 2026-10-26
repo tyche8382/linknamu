@@ -4,23 +4,39 @@
 @custom-variant dark (&:where(.dark, .dark *));
 
 :root {
-  --background: #f3faf6;
-  --foreground: #171717;
+  /* 크림 → 연한 살구색 */
+  --bg-from: #fdf8f0;
+  --bg-to: #fbe2cf;
+  --foreground: #3a2e27;
+  --muted: #8a776b;
+  --accent: #e08a5e;
+  --glow: rgb(255 255 255 / 0.55);
 }
 
 @theme inline {
-  --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-noto-sans-kr);
+  --color-muted: var(--muted);
+  --color-accent: var(--accent);
+  --font-sans: var(--font-pretendard), ui-sans-serif, system-ui, sans-serif;
 }
 
 .dark {
-  --background: #0a0a0a;
-  --foreground: #ededed;
+  /* 따뜻한 톤을 유지한 어두운 배경 */
+  --bg-from: #1d1815;
+  --bg-to: #2b1f19;
+  --foreground: #f3e9e1;
+  --muted: #b3a196;
+  --accent: #f0a47c;
+  --glow: rgb(255 255 255 / 0.04);
   color-scheme: dark;
 }
 
 body {
-  background: var(--background);
+  /* 은은한 빛 번짐을 겹쳐 글래스 카드 뒤에 깊이감을 준다 */
+  background:
+    radial-gradient(40rem 28rem at 15% 10%, var(--glow), transparent 70%),
+    radial-gradient(36rem 30rem at 90% 85%, color-mix(in srgb, var(--accent) 22%, transparent), transparent 70%),
+    linear-gradient(160deg, var(--bg-from) 0%, var(--bg-to) 100%);
+  background-attachment: fixed;
   color: var(--foreground);
 }

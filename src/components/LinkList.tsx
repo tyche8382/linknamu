@@ -26,11 +26,11 @@ export default function LinkList({ links }: LinkListProps) {
   }
 
   if (links.length === 0) {
-    return <p className="text-center text-sm text-neutral-500">아직 등록된 링크가 없어요.</p>;
+    return <p className="text-center text-sm text-muted">아직 등록된 링크가 없어요.</p>;
   }
 
   return (
-    <ul className="flex flex-col gap-3">
+    <ul className="flex flex-col gap-4">
       {links.map((link) => (
         <li key={link.id}>
           <LinkCard link={link} clicks={counts[link.id] ?? 0} onClick={() => handleClick(link.id)} />
