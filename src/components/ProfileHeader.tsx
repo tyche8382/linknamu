@@ -17,7 +17,7 @@ export default function ProfileHeader({ name, bio, avatarUrl }: ProfileHeaderPro
           width={128}
           height={128}
           priority
-          className="size-28 rounded-full object-cover sm:size-32"
+          className="size-28 rounded-full object-cover object-top sm:size-32"
         />
       </div>
       <h1 className="mt-6 text-2xl font-bold tracking-tight sm:text-[1.75rem]">{name}</h1>
