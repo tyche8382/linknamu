@@ -1,31 +1,35 @@
-import { mkdir, readFile, writeFile } from "node:fs/promises";
-import path from "node:path";
+import { MongoClient } from "mongodb";
 
 export type ClickCounts = Record<string, number>;
 
-// 백엔드가 붙기 전까지 클릭 수를 로컬 JSON 파일에 저장한다.
-// 서버리스 배포(Vercel 등)에서는 파일이 유지되지 않으므로 DB로 교체해야 한다.
-const STORE_PATH = path.join(process.cwd(), "data", "clicks.json");
+type ClickDoc = { _id: string; count: number };
 
-// 동시에 들어온 요청이 서로의 쓰기를 덮어쓰지 않도록 순서대로 처리한다.
-let queue: Promise<unknown> = Promise.resolve();
+// 개발 중 HMR로 모듈이 다시 로드돼도 연결을 하나만 유지하도록 전역에 보관한다.
+const globalForMongo = globalThis as unknown as { mongoClient?: Promise<MongoClient> };
 
-export async function getClickCounts(): Promise<ClickCounts> {
-  try {
-    return JSON.parse(await readFile(STORE_PATH, "utf8")) as ClickCounts;
-  } catch {
-    return {};
-  }
+function getClient(): Promise<MongoClient> {
+  const uri = process.env.MONGODB_URI;
+  if (!uri) throw new Error("MONGODB_URI 환경 변수가 설정되지 않았어요.");
+  globalForMongo.mongoClient ??= new MongoClient(uri).connect();
+  return globalForMongo.mongoClient;
 }
 
-export function incrementClick(linkId: string): Promise<number> {
-  const task = queue.then(async () => {
-    const counts = await getClickCounts();
-    counts[linkId] = (counts[linkId] ?? 0) + 1;
-    await mkdir(path.dirname(STORE_PATH), { recursive: true });
-    await writeFile(STORE_PATH, JSON.stringify(counts, null, 2));
-    return counts[linkId];
-  });
-  queue = task.catch(() => {});
-  return task;
+async function clicksCollection() {
+  // 연결 문자열에 DB 이름이 없으면 "linknamu" DB를 쓴다.
+  return (await getClient()).db(process.env.MONGODB_DB ?? "linknamu").collection<ClickDoc>("clicks");
+}
+
+export async function getClickCounts(): Promise<ClickCounts> {
+  const docs = await (await clicksCollection()).find().toArray();
+  return Object.fromEntries(docs.map((doc) => [doc._id, doc.count]));
+}
+
+export async function incrementClick(linkId: string): Promise<number> {
+  // $inc + upsert는 원자적이라 동시에 클릭이 들어와도 누락되지 않는다.
+  const doc = await (await clicksCollection()).findOneAndUpdate(
+    { _id: linkId },
+    { $inc: { count: 1 } },
+    { upsert: true, returnDocument: "after" },
+  );
+  return doc?.count ?? 1;
 }

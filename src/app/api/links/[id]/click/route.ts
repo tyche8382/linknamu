@@ -9,5 +9,10 @@ export async function POST(_req: NextRequest, ctx: RouteContext<"/api/links/[id]
     return Response.json({ error: "존재하지 않는 링크예요." }, { status: 404 });
   }
 
-  return Response.json({ id, count: await incrementClick(id) });
+  try {
+    return Response.json({ id, count: await incrementClick(id) });
+  } catch (err) {
+    console.error("클릭 수 기록 실패:", err);
+    return Response.json({ error: "클릭 수를 기록하지 못했어요." }, { status: 500 });
+  }
 }

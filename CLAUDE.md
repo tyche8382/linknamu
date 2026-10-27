@@ -12,7 +12,7 @@ Link in Bio 서비스. 프로필(사진·이름·한 줄 소개)과 링크 카�
 - 모바일 우선 반응형: 기본 스타일은 모바일 기준, `sm:` 이상에서 확장
 - 프로필/링크 데이터는 현재 `src/data/profile.ts`의 샘플 데이터
 - 다크모드: `html`의 `.dark` 클래스로 전환 (`@custom-variant dark`). 선택은 localStorage에 저장, 없으면 시스템 설정. `src/lib/theme.ts`, `src/components/ThemeToggle.tsx`
-- 클릭 수: `POST /api/links/[id]/click`로 기록, `GET /api/clicks`로 조회. 저장소는 `data/clicks.json`(`src/lib/clicks.ts`, git 제외) — 서버리스 배포 전 DB로 교체 필요
+- 클릭 수: `POST /api/links/[id]/click`로 기록, `GET /api/clicks`로 조회. 저장소는 MongoDB(`MONGODB_URI`, DB `linknamu`의 `clicks` 컬렉션, 문서 `{ _id: 링크 id, count }`). `src/lib/clicks.ts`
 
 ## Commands
 
